@@ -37,10 +37,10 @@ elseif in_roi(Ego_X, Ego_Y, -50.5, -48.7, 15.5, 25.5) && cur_M_signal == 3
 elseif in_roi(Ego_X, Ego_Y, -10, -8.5, 11.5, 25.5) && cur_M_signal == 4
     cur_M_signal = 5;
     cur_lane_id = 5;
-    cur_Parking_signal = 1;
+    cur_Parking_signal = 0;
 
 % CASE 6 M6 : 차량 주차시작
-elseif in_roi(Ego_X, Ego_Y, 7.15, 9.5, -39, -34)
+elseif in_roi(Ego_X, Ego_Y, 7.15, 9.5, -39, -34) && cur_M_signal == 5
     cur_Parking_signal = 1;
 end
 
