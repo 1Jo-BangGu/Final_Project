@@ -1,37 +1,42 @@
-function candidate_paths = generate_candidate_paths_func(route, route1_frenet, route4_frenet, ego_s, ego_d)
+function candidate_paths = generate_candidate_paths_func(global_s, global_d, ego_s, ...
+    ego_d, deviation_list, index_offset, num_points)
+    % global_s, global_d : 전역 경로의 frenet 좌표 (벡터)
+    % ego_s, ego_d       : ego 차량의 frenet 좌표 (스칼라)
+    % deviation_list     : d 방향 deviation 리스트 (예: [-2 -1.5 ... 2])
+    % index_offset       : ego 위치에서 몇 인덱스 이후를 terminal로 할지 (예: 10)
+    % num_points         : 각 후보 경로의 포인트 개수 (예: 50)
+    %
+    % 반환값: candidate_paths (cell array, 각 cell에 [num_points x 2] (s, d) 배열)
 
-    global_s = route(:,1);
-    global_d = route(:,2);
-    
-    % lane_width를 고정값으로 가정
-    lane_width = 6;
-    num_lateral_paths = 9;  % 반드시 홀수 (중앙값이 0이 되도록)
-    
-    % d
-    % 왼쪽이 양수
-    % 오른쪽이 음수
-    
-    % 중앙값이 0이 되도록 등간격 리스트 생성
-    half_range = lane_width/2;
-    step = 2 * half_range / (num_lateral_paths - 1);
-    deviation_list = -half_range : step : half_range;
-    
-    if isequal(route, route1_frenet)
-        if ego_d > 0
-            deviation_list(deviation_list > 0) = 0; % 차량이 왼쪽 차선의 바깥쪽에 붙은 경우 중앙~오른쪽만 허용
-        end 
+    N = length(deviation_list);
+    candidate_paths = zeros(num_points, 2, N);
+
+    % 1. ego 위치와 가장 가까운 점 찾기
+    [~, closest_idx] = min(abs(global_s - ego_s));
+
+    % 2. 기준점 인덱스 (10개 이후)
+    base_idx = closest_idx + index_offset;
+    if base_idx > length(global_s)
+        base_idx = length(global_s);
     end
-    
-    if isequal(route, route4_frenet)
-        if ego_d < 0
-            deviation_list(deviation_list < 0) = 0;  % 차량이 오른쪽 차선의 바깥쪽에 붙은 경우 차선은 중앙~왼쪽만 허용
-        end
+    s_base = global_s(base_idx);
+    d_base = global_d(base_idx);
+
+    % 3. 각 deviation에 대해 terminal point 생성 및 경로 생성
+    for i = 1:N
+        terminal_s = s_base;
+        terminal_d = d_base + deviation_list(i);
+
+        % 4. quintic curve 계수 생성 (초기 속도/가속도는 0으로 가정)
+        coeffs = quintic_curve_generate(ego_s, ego_d, 0, 0, terminal_s, terminal_d);
+        
+        % 5. s 값 균등 분할
+        s_vals = linspace(ego_s, terminal_s, num_points);
+
+        % 6. d 값 계산 (polyval은 계수 역순)
+        d_vals = polyval(flip(coeffs), s_vals);
+
+        candidate_paths(:,1,i) = s_vals(:);
+        candidate_paths(:,2,i) = d_vals(:);
     end
-    
-    % 경로 설정 파라미터
-    lookahead_index  = 5;          % lookahead_index
-    num_points = 20;
-    
-    candidate_paths = generate_candidate_paths_func( ...
-        global_s, global_d, ego_s, ego_d, deviation_list, lookahead_index , num_points);
 end

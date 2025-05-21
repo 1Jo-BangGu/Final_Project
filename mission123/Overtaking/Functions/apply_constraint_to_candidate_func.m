@@ -1,4 +1,4 @@
-function valid_idx = apply_constraint_to_candidate_func(candidate_paths_cartesian, kappa_threshold, obs_xy, col_check_d)
+function valid_idx = apply_constraint_to_candidate_func(candidate_paths_cartesian, obs_xy)
     % candidate_paths_cartesian: [num_points x 4 x num_candidates] (4번째 열이 kappa)
     % kappa_threshold: 허용 최대 곡률 값 (예: 0.2)
     % obs_xy: [M x 2] 장애물의 (x, y) 좌표 (Cartesian)
