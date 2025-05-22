@@ -5,8 +5,11 @@ function valid_idx = apply_constraint_to_candidate_func(candidate_paths_cartesia
     % col_check_d: 충돌 판정 거리 (예: 2.0)
     % 반환값 valid_idx: 조건을 만족하는 후보 경로 인덱스 (벡터)
 
-    kappa_threshold = 0.2;
-    col_check_d = 0.5;
+    % kappa_threshold = 0.2;
+    % col_check_d = 0.5;
+    kappa_threshold = 200000;
+    col_check_d = 3;
+
 
     [num_points, ~, num_candidates] = size(candidate_paths_cartesian);
     valid_idx = [];
