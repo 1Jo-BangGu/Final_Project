@@ -5,17 +5,18 @@ function valid_idx = apply_constraint_to_candidate_func(candidate_paths_cartesia
     % col_check_d: 충돌 판정 거리 (예: 2.0)
     % 반환값 valid_idx: 조건을 만족하는 후보 경로 인덱스 (벡터)
 
-    kappa_threshold = 0.2;
-    col_check_d = 0.5;
+    kappa_threshold = 20000;
+    % col_check_d = 1.2;
+    col_check_d = 1.8;
 
     [num_points, ~, num_candidates] = size(candidate_paths_cartesian);
     valid_idx = [];
-    
+
     for i = 1:num_candidates
         kappa = candidate_paths_cartesian(:,4,i);
         % 곡률 조건
         kappa_ok = all(abs(kappa) <= kappa_threshold);
-    
+
         % 충돌 조건
         collision = false;
         for j = 1:size(obs_xy,1)
@@ -29,7 +30,7 @@ function valid_idx = apply_constraint_to_candidate_func(candidate_paths_cartesia
                 break;
             end
         end
-    
+
         % AND 조건
         if kappa_ok && ~collision
             valid_idx = [valid_idx, i];

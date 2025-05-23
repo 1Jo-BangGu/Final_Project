@@ -1,7 +1,9 @@
 function path_costs = calculate_path_costs_func(candidate_paths, opt_d, target_speed, dt)
-    %#codegen
-    K_J = 0.01; K_T = 0.1; K_D = 100.0;
-    K_V = 1.0; K_LAT = 10.0; K_LON = 1.0;
+    % % %#codegen
+    % K_J = 0.01; K_T = 0.1; K_D = 1.0;
+    % K_V = 1.0; K_LAT = 1.5; K_LON = 1.0;
+    K_J = 0.1; K_T = 0.1; K_D = 1.0;
+    K_V = 1.0; K_LAT = 2.0; K_LON = 1.0;
     
     [num_points, ~, num_paths] = size(candidate_paths);
     path_costs = zeros(num_paths,1);

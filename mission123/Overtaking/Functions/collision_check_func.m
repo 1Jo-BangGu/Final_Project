@@ -10,7 +10,7 @@ function [optimal_path, num_points, best_idx, candidates_cost] = collision_check
     invalid_idx = setdiff(all_idx, valid_idx);
 
     % 유효하지 않은 인덱스에 penalty 부여
-    penalty = 1e6;
+    penalty = 2e6;
     candidates_cost(invalid_idx) = candidates_cost(invalid_idx) + penalty;
 
     % 최소 cost 경로 선택
