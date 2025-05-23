@@ -50,12 +50,12 @@ MATLAB & Simulink 기반으로, 실제 도로 환경을 반영한 시나리오�
 ## 📂 프로젝트 구조
 
 ```
-├── src/         # 알고리즘 소스코드 (.m)
-├── models/      # Simulink 모델 파일 (.slx)
-├── simulation/  # 미션별 시나리오 결과
-├── data/        # 원본 및 전처리 데이터
-├── docs/        # 문서 및 발표자료
-└── README.md
+├── supervisor/           # 상위 모듈
+├── mission123/           # 미션 1~3 모듈
+│   ├─ LaneChange/        # 차선 변경 모듈
+│   └─ Overtaking/        # 추월 주행 모듈
+└── mission4/             # 미션 4 모듈
+    └─ parking/           # 주차 모듈
 ```
 
 
