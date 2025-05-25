@@ -30,21 +30,21 @@ MATLAB & Simulink 기반으로, 실제 도로 환경을 반영한 시나리오�
 
 | 이름     | 역할   | 담당 업무                                   |
 |:-------:|:------:|:-------------------------------------------|
-| 최종환   | 팀장   | 시스템 아키텍처 설계                        |
-| 최수빈   | 팀원   | Lane Change, 제어                           |
-| 유형종   | 팀원   | 주차 경로/Map 생성, 시뮬레이션               |
-| 한대혁   | 팀원   | 충돌 감지, 주차 시스템, Map 생성/시뮬레이션  |
+| 최종환   | 팀장/설계   | 시스템 아키텍처 설계 / 시스템 통합 / 시스템 검증  / 주차 제어 |
+| 최수빈   | 개발/검증   | 자율주행 Lane Change 및 차량 제어 / 시스템 검증 |
+| 유형종   | 개발   | 자율주행 주차 path 생성 알고리즘 구현 / Map 생성 및 시뮬레이션 |
+| 한대혁   | 개발   | 충돌 감지 및 주차 시스템 구현 / Map 생성 및 시뮬레이션 |
 
 ### 2팀 (추월)
 
-| 이름     | 역할   | 담당 업무                                   |
-|:-------:|:------:|:-------------------------------------------|
-| 김호진   | 팀장   | PM/시스템 아키텍처 설계, 통합, 형상관리      |
-| 송형라   | 팀원   | Frenet to Global, 시스템 검증, PPT 제작      |
-| 이지민   | 팀원   | Candidate Paths 생성/최적화, Data Viz       |
-| 조수빈   | 팀원   | Cost 설계/파라미터, Candidate Paths         |
-| 조희연   | 팀원   | Frenet 변환, Candidate Paths 생성, PPT 제작 |
-| 천세영   | 팀원   | 경로 제약조건, Candidate Selection, 튜닝     |
+| 이름     | 역할   | 담당 업무                                                      |
+|:-------:|:------:|:------------------------------------------------------------|
+| 김호진   | PM   | 데이터 정제 및 정규화 / 형상 관리 / Issue 관리 및 피드백|
+| 송형라   | 검증   | Frenet to Global, 시스템 검증, PPT 제작      |
+| 이지민   | 개발   | Candidate paths 생성, 최적화 및 Parameter Tuning / Data Visualization |
+| 조수빈   | 개발   | Cost 설계/파라미터, Candidate Paths 생성, Trajectory planning Algorithm 설계 및 개발 |
+| 조희연   | 개발   | Global to Frenet 변환 / Candidate paths 생성  / PPT 제작|
+| 천세영   | 설계   | 시스템 아키텍처 설계 / 경로 제약 조건 설계 / 유효 Candidate selection / Parameter Tuning|
 
 
 ## 📂 프로젝트 구조
@@ -67,11 +67,21 @@ MATLAB & Simulink 기반으로, 실제 도로 환경을 반영한 시나리오�
 - **주차 알고리즘:** RRT*, Hybrid A* 등 적용
 
 
-## 🖼️ 결과 예시
+## 🖼️ 프로젝트 내용
 
-> 시뮬레이션 결과 이미지, 동영상, 주요 그래프 등 첨부  
-> (예시 이미지/영상은 docs/폴더 또는 깃허브 이슈 등에서 링크)
+![시스템설계](image/시스템설계.png)
 
+![주기 기반 제어 구조](image/주기기반제어구조.png)
+
+![Overtaking](image/Overtaking.png)
+
+![Mission 1](image/Mission1.png)
+
+![Mission 2,3](image/Mission2,3.png)
+
+![Mission4](image/Mission4.png)
+
+![Parking_Control](image/Parking_Control.png)
 
 
 ## 💡 프로젝트 활용 및 기대 효과
@@ -86,3 +96,9 @@ MATLAB & Simulink 기반으로, 실제 도로 환경을 반영한 시나리오�
 - **잘한 점:** 실제 환경을 반영한 시나리오별 미션 구현, 팀원 간 협업 및 코드 통합, 시뮬레이션 기반 검증
 - **아쉬운 점:** 일부 미션에서의 세부 성능 한계, 시간 부족으로 인한 최적화 미흡
 - **향후 개선:** 모델 정확도 향상, 추가 미션/실차 적용, 코드 리팩토링 및 문서화
+
+## 노션 페이지 
+https://www.notion.so/1f189ed96aa1806495e9f2617c1113d8?v=1f189ed96aa18047bd58000c21cd463f
+
+## 시연 영상
+https://youtu.be/falxSdTmnzs

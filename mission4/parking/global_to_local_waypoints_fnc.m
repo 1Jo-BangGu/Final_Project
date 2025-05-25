@@ -23,7 +23,7 @@ function [local_waypoints_, goal_reached, near_goal_zone] = global_to_local_wayp
     y_ego = vehicle_position(2);
 
     % --- 도착 여부 판단 (절대 거리 기준) ---
-    goal_threshold = 4.5;  % [m]
+    goal_threshold = 4.0;  % [m]
     goal_point = waypoints(path_len, :);
     distance_to_goal = hypot(goal_point(1) - x_ego, goal_point(2) - y_ego);
     if distance_to_goal < goal_threshold

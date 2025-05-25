@@ -16,16 +16,15 @@ if success_cached
     return;
 end
 
-MAX_NODES = 1000;
+MAX_NODES = 3000;
 MAX_PATH_LEN = 400;
-goal_radius = 8.0;
-goal_sample_rate = 0.05;
+goal_radius = 12;
+goal_sample_rate = 0.1;
 eta = 3.0;
 
 start = [Ego_Global_X, Ego_Global_Y];
-goal  = [7.25, -33.2];
+goal  =  [17, -10.1];
 vehicle_size = [1.97, 4.47];
-%vehicle_size = [2.1, 4.6];
 
 map_boundary = [5.5, -4, 47.5, -3.9, 47.5, -44.9, 5.5, -44.9];
 x_vals = map_boundary(1:2:end);
@@ -47,12 +46,17 @@ nodes(1).pos = reshape(start,1,2);
 node_count = int32(1);
 goal_node = int32(0);
 
-for iter = 1:500
-    if rand < goal_sample_rate
+for iter = 1:MAX_NODES
+    r = rand;
+    if r < goal_sample_rate
         sample = goal;
-    else
+    elseif r < 0.6
         sample = [x_min + rand*(x_max - x_min), y_min + rand*(y_max - y_min)];
+    else
+        sample = [x_min + rand*(x_max - x_min), -15 + rand * (-5)];
     end
+    sample(1) = min(max(sample(1), x_min), x_max);
+    sample(2) = min(max(sample(2), y_min), y_max);
 
     nearest_idx = int32(1);
     min_dist = norm(nodes(1).pos - sample);
@@ -102,68 +106,51 @@ if goal_node > 0
 
     flipped = flipud(temp_path(1:i,:));
 
-%% === Hybrid A* 전·후 직진 (동적 x-offset + y 방향 판단) ===
-pre_steps  = 10;    % goal 도달 전 스텝 수
-post_steps = 8;     % goal 도달 후 스텝 수
-step_dist  = 0.5;   % 한 스텝 거리
+    % Hybrid A* 직선 후처리
+    pre_steps  = 12;
+    post_steps = 6;
+    step_dist  = 0.5;
+    last_pos = flipped(end, :);
 
-% RRT* 경로의 마지막 점: goal 직전 위치
-last_pos = flipped(end, :);
+    if last_pos(1) < goal(1)
+        hybrid_x = goal(1) - 0.9;
+    else
+        hybrid_x = goal(1) + 0.9;
+    end
 
-% 접근 방향에 따라 x-offset 결정 (좌우 판단)
-if last_pos(1) < goal(1)
-    % 왼쪽에서 → goal 로 접근 ⇒ 직선 구간은 goal.x - 0.5
-    hybrid_x = goal(1) - 0.9;
-else
-    % 오른쪽에서 → goal 로 접근 ⇒ 직선 구간은 goal.x + 0.5
-    hybrid_x = goal(1) + 0.9;
+    if goal(2) > -36.5
+        pre_path = [ repmat(hybrid_x, pre_steps,1), ...
+                     goal(2) - step_dist*(pre_steps:-1:1)' ];
+        post_path = [ repmat(hybrid_x, post_steps,1), ...
+                      goal(2) + step_dist*(1:post_steps)' ];
+    else
+        pre_path = [ repmat(hybrid_x, pre_steps,1), ...
+                     goal(2) + step_dist*(pre_steps:-1:1)' ];
+        post_path = [ repmat(hybrid_x, post_steps,1), ...
+                      goal(2) - step_dist*(1:post_steps)' ];
+    end
+
+    hybrid_path = [pre_path; goal; post_path];
+    raw_path    = [flipped; hybrid_path];
+    path_interp = smooth_path(raw_path, 0.5);
+    path_interp = smooth_moving_average(path_interp, 35);
+
+    path_len    = size(path_interp,1);
+    path_out    = zeros(MAX_PATH_LEN, 2);
+    path_out(1:path_len, :) = path_interp;
+    success_flag = true;
+
+    path_cached     = path_out;
+    path_len_cached = path_len;
+    success_cached  = true;
 end
 
-% goal 위치에 따라 y 방향 판단 (상하 방향)
-if goal(2) > -36.5
-    % ✅ 아래쪽에서 위로 (y 증가 방향 직선 구간)
-    pre_path = [ repmat(hybrid_x, pre_steps,1), ...
-                 goal(2) - step_dist*(pre_steps:-1:1)' ];
-
-    post_path = [ repmat(hybrid_x, post_steps,1), ...
-                  goal(2) + step_dist*(1:post_steps)' ];
-else
-    % ✅ 위쪽에서 아래로 (y 감소 방향 직선 구간)
-    pre_path = [ repmat(hybrid_x, pre_steps,1), ...
-                 goal(2) + step_dist*(pre_steps:-1:1)' ];
-
-    post_path = [ repmat(hybrid_x, post_steps,1), ...
-                  goal(2) - step_dist*(1:post_steps)' ];
 end
 
-% goal 지점 포함한 hybrid path 생성
-hybrid_path = [pre_path; goal; post_path];
-
-% 뒤쪽 RRT* 경로 + hybrid 직선 합치고 스무딩
-raw_path    = [flipped; hybrid_path];
-path_interp = smooth_path(raw_path, 0.5);
-
-% 여기서 moving average smoothing 추가 (windowSize=5 예시)
-path_interp = smooth_moving_average(path_interp, 20);
-path_len    = size(path_interp,1);
-path_out    = zeros(MAX_PATH_LEN, 2);
-path_out(1:path_len, :) = path_interp;
-success_flag = true;
-
-% 캐싱
-path_cached     = path_out;
-path_len_cached = path_len;
-success_cached  = true;
-
-end
-end
-
-%% ===== 보조 함수들 =====
-
+%% === 보조 함수 ===
 function collision = check_collision(p1, p2, vehicle_size, obs_list)
     collision = false;
     steps = 10;
-    exception_obs = [26.5, -4, 0.1, 42.0, 0];
     for t = linspace(0,1,steps)
         pt = (1-t)*p1 + t*p2;
         yaw = atan2(p2(2)-p1(2), p2(1)-p1(1));
@@ -172,9 +159,6 @@ function collision = check_collision(p1, p2, vehicle_size, obs_list)
             if check_single_collision(veh, obs_list(i,:))
                 collision = true; return;
             end
-        end
-        if check_single_collision(veh, exception_obs)
-            collision = true; return;
         end
     end
 end
@@ -237,10 +221,9 @@ function smoothed = smooth_moving_average(path, windowSize)
     N = size(path,1);
     half = floor(windowSize/2);
     smoothed = zeros(N,2);
-
     for i = 1:N
         if i == 1 || i == N
-            smoothed(i,:) = path(i,:);  % 시작점과 끝점은 고정
+            smoothed(i,:) = path(i,:);
         else
             i0 = max(1, i-half);
             i1 = min(N, i+half);
